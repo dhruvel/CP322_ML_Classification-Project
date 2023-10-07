@@ -12,9 +12,3 @@ arr = arr[~np.any(arr == " ?", axis=1)]
 arr = np.unique(arr, axis=0)
 
 
-with open("CP322_ML_Classification-Project/data/adult_clean.data", 'w') as f:
-    # write contents of array to file
-    for row in arr:
-        f.write(','.join(row) + '\n')
-
-    f.close()
