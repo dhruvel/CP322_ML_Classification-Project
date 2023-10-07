@@ -1,18 +1,19 @@
-from ucimlrepo import fetch_ucirepo
-import pandas as pd
+import numpy as np
 
 
 # fetch dataset
-ionosphere = fetch_ucirepo(id=52)
+ionosphere_data = np.loadtxt("CP322_ML_Classification-Project/data/ionosphere/ionosphere.data", delimiter=',', dtype='str')
+arr = np.array(ionosphere_data)
 
-# load data into pandas dataframe
-df = pd.DataFrame(data=ionosphere.data.features, columns=ionosphere.feature_names)
-
-# remove missing values
-df = df.dropna()
+# remove rows with missing values
+arr = arr[~np.any(arr == " ?", axis=1)]
 
 # remove duplicate rows
-df = df.drop_duplicates()
+arr = np.unique(arr, axis=0)
 
-# remove rows with invalid values
-df = df[(df != '?').all(axis=1)]
+with open("CP322_ML_Classification-Project/data/ionosphere_clean.data", 'w') as f:
+    # write contents of array to file
+    for row in arr:
+        f.write(','.join(row) + '\n')
+
+    f.close()
