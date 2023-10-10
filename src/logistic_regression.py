@@ -1,6 +1,7 @@
 import numpy as np
+from model_interface import ModelInterface
 
-class LogisticRegression:
+class LogisticRegression(ModelInterface):
     def __init__(self, learning_rate, regularization_lambda):
         self.learning_rate = learning_rate
         self.regularization_lambda = regularization_lambda
@@ -17,7 +18,7 @@ class LogisticRegression:
     def _derivative_cost(self, param, param_x: np.ndarray, y: np.ndarray, y_pred: np.ndarray):
         return np.mean((y_pred - y) * param_x) + ((self.regularization_lambda * param) / len(self.params))
 
-    def fit(self, train_data, train_labels, training_threshold=0.1, max_iterations=20000, print_cost=False):
+    def fit(self, train_data, train_labels, training_threshold=0.1, max_iterations=np.Inf, print_cost=False):
         self.params = np.random.rand(train_data.shape[1])
         self.b = np.random.rand(1)
 
@@ -40,4 +41,10 @@ class LogisticRegression:
                 self.b -= self.learning_rate * self._derivative_cost(0, 1, train_labels, y_pred)
 
     def predict(self, test_data):
-        pass
+        y_pred = np.zeros(test_data.shape[0])
+        # Predict each test data point
+        for i in range(test_data.shape[0]):
+            y_pred[i] = self._sigmoid(test_data[i])
+            
+        # Turn probabilities into a binary prediction
+        return [1 if x > 0.5 else 0 for x in y_pred]
