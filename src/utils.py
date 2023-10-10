@@ -42,3 +42,29 @@ def kfold_cross_validation(data, create_model: Callable[[], ModelInterface], k=5
         accuracies.append(evaluate_acc(predictions, cv_labels))
         
     return sum(accuracies) / len(accuracies)
+
+def save_model(args, model: ModelInterface, filename: str):
+    with open(filename, "a") as f:
+        for arg in args:
+            f.write(arg + ",")
+        for param in model.params:
+            f.write(str(param) + ",")
+        f.write(str(model.b) + "\n")
+
+def load_models(filename: str, arg_num: int):
+    with open(filename, "r") as f:
+        models = []
+        for line in f:
+            values = line.split(",")
+            args = float(values[:arg_num])
+            params = float(values[arg_num:-1])
+            b = float(values[-1])
+            
+            model = {
+                "args": args,
+                "params": params,
+                "b": b
+            }
+            models.append(model)
+
+    return models

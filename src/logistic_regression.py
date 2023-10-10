@@ -8,3 +8,6 @@ class LogisticRegression:
 
     def predict(test_data):
         pass
+
+    def load(params, b):
+        pass
