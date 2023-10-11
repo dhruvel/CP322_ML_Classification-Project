@@ -18,13 +18,12 @@ from data.data_all import adult_data, ionosphere_data, wine_data, rice_data
 # print("Ionosphere accuracy: {}, cost: {}, test cost: {}".format(accuracy, ionosphere_model.cost, 0))
 
 # Fit ionosphere data, trying different regularization lambdas, learning rates, and using 5-fold cross validation
-threshold = 25
+threshold = 20
 best_model, accuracy, test_cost = find_best_logistic_model(
     ionosphere_data,
-    LogisticRegression,
-    threshold=threshold,
+    training_threshold=threshold,
     print_acc=True,
-    model_file="models/ionosphere_models.csv",
+    model_file="ionosphere_models.csv",
 )
 
 print("Ionosphere data")
@@ -46,5 +45,5 @@ save_model(
         test_cost,
     ],
     best_model,
-    "models/top_models.csv"
+    "top_models.csv"
 )

@@ -63,7 +63,7 @@ def kfold_cross_validation(
             )
 
         # Keep track of best models
-        cost_diffs.append(model.cost - test_cost)
+        cost_diffs.append((model.cost - test_cost) ** 2)
         if cost_diffs[-1] < best_cost:
             best_cost = cost_diffs[-1]
             least_cost_model = model
