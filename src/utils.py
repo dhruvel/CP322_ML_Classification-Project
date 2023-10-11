@@ -10,7 +10,7 @@ def evaluate_acc(predictions, labels):
     return sum(predictions == labels) / len(labels)
 
 def save_model(args, model: ModelInterface, filename: str):
-    with open("models/" + filename, "a") as f:
+    with open("../models/" + filename, "a") as f:
         for arg in args:
             f.write(str(arg) + ",")
         for param in model.params:
@@ -18,7 +18,7 @@ def save_model(args, model: ModelInterface, filename: str):
         f.write(str(model.b[0]) + "\n")
 
 def load_models(filename: str, arg_num: int):
-    with open("models/" + filename, "r") as f:
+    with open("../models/" + filename, "r") as f:
         models = []
         for line in f:
             values = line.split(",")
