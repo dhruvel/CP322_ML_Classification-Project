@@ -11,7 +11,7 @@ class LogisticRegression(ModelInterface):
         return 1 / (1 + np.exp(-model_pred))
     
     def _cost(self, y: np.ndarray, y_pred: np.ndarray):
-        error = -np.mean(y * np.log(y_pred) + (1 - y) * np.log(1 - y_pred))
+        error = -np.mean(y * np.log(y_pred, where=y_pred > 0) + (1 - y) * np.log(1 - y_pred, where=y_pred != 1))
         regularization = (self.regularization_lambda / 2 * len(self.params)) * np.sum(self.params ** 2)
         return error + regularization
     
@@ -40,11 +40,20 @@ class LogisticRegression(ModelInterface):
                 self.params[i] -= self.learning_rate * self._derivative_cost(self.params[i], x, train_labels, y_pred)
                 self.b -= self.learning_rate * self._derivative_cost(0, 1, train_labels, y_pred)
 
-    def predict(self, test_data):
+    def predict(self, test_data, test_labels=None):
         y_pred = np.zeros(test_data.shape[0])
         # Predict each test data point
         for i in range(test_data.shape[0]):
             y_pred[i] = self._sigmoid(test_data[i])
-            
+        
+        if test_labels is not None:
+            test_cost = self._cost(test_labels, y_pred)
+
         # Turn probabilities into a binary prediction
-        return [1 if x > 0.5 else 0 for x in y_pred]
+        return [1 if x > 0.5 else 0 for x in y_pred], test_cost if test_labels is not None else None
+
+    def load(self, args, params, b):
+        self.learning_rate = args[0]
+        self.regularization_lambda = args[1]
+        self.params = params
+        self.b = b

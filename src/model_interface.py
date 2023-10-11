@@ -7,5 +7,9 @@ class ModelInterface(ABC):
         pass
 
     @abstractmethod
-    def predict(self, test_data):
+    def predict(self, test_data, test_labels=None):
+        pass
+
+    @abstractmethod
+    def load(self, params, b):
         pass
