@@ -52,7 +52,7 @@ def kfold_cross_validation(
                     model.learning_rate,
                     model.regularization_lambda,
                     training_threshold,
-                    max_iterations,
+                    model.iterations,
                     train_data.shape[0],
                     accuracies[-1],
                     model.cost,
@@ -63,7 +63,7 @@ def kfold_cross_validation(
             )
 
         # Keep track of best models
-        cost_diffs.append((model.cost - test_cost) ** 2)
+        cost_diffs.append(abs(model.cost - test_cost))
         if cost_diffs[-1] < best_cost:
             best_cost = cost_diffs[-1]
             least_cost_model = model
@@ -136,3 +136,9 @@ def find_best_logistic_model(
     predicted, test_cost = best_model.predict(test_data[:, :-1], test_data[:, -1])
     accuracy = evaluate_acc(predicted, test_data[:, -1])
     return best_model, accuracy, test_cost
+
+def plot_accuracy_iterations():
+    pass
+
+def plot_accuracy_size():
+    pass

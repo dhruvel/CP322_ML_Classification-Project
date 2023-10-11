@@ -7,4 +7,4 @@ from .fetch_lung_cancer import arr as lung_cancer
 adult_data = adult
 ionosphere_data = ionosphere
 wine_data = wine
-rice_data = lung_cancer
+lung_cancer_data = lung_cancer
