@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
 import numpy as np
+from typing import TypeVar
+
+T = TypeVar('T', bound='ModelInterface')
 
 class ModelInterface(ABC):
     @abstractmethod
-    def fit(self, train_data, train_labels, training_threshold=0.1, max_iterations=np.Inf, print_cost=False):
+    def fit(self, train_data, train_labels, training_threshold=0.1, max_iterations=np.Inf, print_cost=False) -> T:
         pass
 
     @abstractmethod
@@ -11,5 +14,5 @@ class ModelInterface(ABC):
         pass
 
     @abstractmethod
-    def load(self, params, b):
+    def Load(args, params, b) -> T:
         pass

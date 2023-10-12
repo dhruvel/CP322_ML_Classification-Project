@@ -1,5 +1,3 @@
-
-from ucimlrepo import fetch_ucirepo 
 import pandas
 import matplotlib.pyplot as plt
 import numpy as np
@@ -24,20 +22,16 @@ import math as m
 import random
 
 class KNNClassifier:
-    
-    
-
-    def __init__(self,dataSet,k):
+    def __init__(self, dataSet, k):
         self.data = dataSet
         self.kNumbers = k
         #2D array where the first point in each row is the centre for that cluster
         self.clusters = []
         
     def getDistance(self,first, second):
-        return m.sqrt( (second[0]-first[0])**2 + (second[1]-first[1])**2 )
+        return m.sqrt((second[0] - first[0]) ** 2 + (second[1] - first[1]) ** 2)
     
     def assignCentres(self):
-        
         centres = []
         
         #wipe clusters to reset
@@ -74,7 +68,6 @@ class KNNClassifier:
         return
     
     def newCentres(self):
-
         if len(self.clusters) == 0:
             print("Cannot assign centres to an empty cluster array.")
             return
@@ -94,8 +87,7 @@ class KNNClassifier:
             row[0][0] = xAverage
             row[0][1] = yAverage
     
-    def runKNN(self,maxX,maxY):
-
+    def runKNN(self, maxX, maxY):
         for i in range(0,self.kNumbers):
             initx = random.randint(0,maxX)
             inity = random.randint(0,maxY)
@@ -116,37 +108,36 @@ class KNNClassifier:
             print()
 
 data = [
-[5,2],
-[2,4],
-[9,5],
-[4,6],
-[5,2],
-[1,5],
-[6,7],
-[4,2],
-[6,4],
-[9,2],
-[4,5],
-[1,6],
-[4,7],
-[3,6],
-[1,1],
-[8,4],
-[8,7],
-[7,2],
-[2,2],
-[2,1],
-[1,2],
-[1,4],
-[2,6],
-[7,7],
-[7,4],
-[3,4],
-[1,4]
+    [5,2],
+    [2,4],
+    [9,5],
+    [4,6],
+    [5,2],
+    [1,5],
+    [6,7],
+    [4,2],
+    [6,4],
+    [9,2],
+    [4,5],
+    [1,6],
+    [4,7],
+    [3,6],
+    [1,1],
+    [8,4],
+    [8,7],
+    [7,2],
+    [2,2],
+    [2,1],
+    [1,2],
+    [1,4],
+    [2,6],
+    [7,7],
+    [7,4],
+    [3,4],
+    [1,4],
 ]
 x = [i[0] for i in data]
 y = [i[1] for i in data]
-
 
 example = KNNClassifier(data,2)
 

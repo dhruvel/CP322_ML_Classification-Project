@@ -1,5 +1,6 @@
 from typing import Callable, List
 import numpy as np
+import multiprocessing as mp
 from model_interface import ModelInterface
 from logistic_regression import LogisticRegression
 from utils import split_data, evaluate_acc, save_model
@@ -8,8 +9,9 @@ def kfold_cross_validation(
         data,
         create_model: Callable[[], ModelInterface],
         k=5,
-        training_threshold=0.1,
+        cost_change_threshold=0.0001,
         max_iterations=15000,
+        max_cost=np.Inf,
         print_acc=False,
         model_file="",
     ):
@@ -19,29 +21,31 @@ def kfold_cross_validation(
     for i in range(k):
         folds.append(data[i * fold_size:(i + 1) * fold_size])
 
-    # Train k models
+    # Train k models in parallel using pools
+    pool = mp.Pool(5)
+    results = []
+    for i in range(k):
+        train_data = np.concatenate(folds[:i] + folds[i + 1:])
+        model = create_model()
+        results.append(pool.apply_async(
+            model.fit,
+            (train_data[:, :-1], train_data[:, -1], cost_change_threshold, max_iterations)
+        ))
+    pool.close()
+    pool.join()
+
     accuracies = []
     cost_diffs = []
-    accurate_model = None
-    least_cost_model = None
     best_acc = 0
     best_cost = np.Inf
-    for i in range(k):
-        # Train model on k-1 folds
-        train_data = np.concatenate(folds[:i] + folds[i + 1:])
-        train_labels = train_data[:, -1]
-        train_data = train_data[:, :-1]
-
-        model = create_model()
-        model.fit(train_data, train_labels, training_threshold=training_threshold, max_iterations=max_iterations)
-
-        # Test model on remaining fold with cross-validation data
-        cv_data = folds[i]
-        cv_labels = cv_data[:, -1]
-        cv_data = cv_data[:, :-1]
-
-        predictions, test_cost = model.predict(cv_data, cv_labels)
-        accuracies.append(evaluate_acc(predictions, cv_labels))
+    best_cost_model: ModelInterface = None
+    accurate_model: ModelInterface = None
+    for i in range(len(results)):
+        # Test models on remaining fold with cross-validation data
+        model = results[i].get()
+        predicted, test_cost = model.predict(folds[i][:, :-1], folds[i][:, -1])
+        accuracy = evaluate_acc(predicted, folds[i][:, -1])
+        accuracies.append(accuracy)
 
         if print_acc:
             print("Fold {}: accuracy {}, cost {}, test cost: {}".format(i, accuracies[-1], model.cost, test_cost))
@@ -51,16 +55,19 @@ def kfold_cross_validation(
                 [
                     model.learning_rate,
                     model.regularization_lambda,
-                    training_threshold,
+                    cost_change_threshold,
                     model.iterations,
                     train_data.shape[0],
-                    accuracies[-1],
+                    accuracy,
                     model.cost,
                     test_cost,
                 ],
                 model,
                 model_file
             )
+
+        if model.cost > max_cost:
+            continue
 
         # Keep track of best models
         cost_diffs.append(abs(model.cost - test_cost))
@@ -73,6 +80,8 @@ def kfold_cross_validation(
             accurate_model = model
     
     # Return average accuracy and best accuracy model
+    if accurate_model is None:
+        return 0, None, np.Inf, None
     return sum(accuracies) / len(accuracies), accurate_model, sum(cost_diffs) / len(cost_diffs), least_cost_model
 
 def find_best_logistic_model(
@@ -80,9 +89,10 @@ def find_best_logistic_model(
         learning_rates=[0.005, 0.01, 0.05, 0.1],
         regularization_lambdas=[0, 0.1, 0.5, 1, 2],
         k=5,
-        training_threshold=0.1,
+        cost_change_threshold=0.0001,
         max_iterations=15000,
-        max_cost=0.1,
+        max_cost_diff=0.1,
+        max_cost=5,
         test_split_ratio=0.95,
         print_acc=False,
         model_file="",
@@ -106,8 +116,9 @@ def find_best_logistic_model(
                 train_data,
                 create_model,
                 k=k,
-                training_threshold=training_threshold,
+                cost_change_threshold=cost_change_threshold,
                 max_iterations=max_iterations,
+                max_cost=max_cost,
                 model_file=model_file,
                 print_acc=print_acc,
             )
@@ -120,7 +131,7 @@ def find_best_logistic_model(
                         kfold_cost_diff
                     ))
             
-            if kfold_cost_diff < max_cost:
+            if kfold_cost_diff < max_cost_diff and kfold_cost_model is not None:
                 best_cost_models.append((kfold_acc, kfold_cost_model))
     
     # Find highest accuracy model among those with lowest cost difference
@@ -133,6 +144,9 @@ def find_best_logistic_model(
             best_model = model
 
     # Find accuracy of best model on test data
+    if best_model is None:
+        return None, 0, np.Inf
+    
     predicted, test_cost = best_model.predict(test_data[:, :-1], test_data[:, -1])
     accuracy = evaluate_acc(predicted, test_data[:, -1])
     return best_model, accuracy, test_cost
