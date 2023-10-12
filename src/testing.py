@@ -1,5 +1,6 @@
 from typing import Callable, List
 import numpy as np
+import matplotlib.pyplot as plt
 from model_interface import ModelInterface
 from logistic_regression import LogisticRegression
 from utils import split_data, evaluate_acc, save_model
@@ -137,8 +138,54 @@ def find_best_logistic_model(
     accuracy = evaluate_acc(predicted, test_data[:, -1])
     return best_model, accuracy, test_cost
 
-def plot_accuracy_iterations():
-    pass
+def plot_accuracy_iterations(
+        data,
+        learning_rates=[0.005, 0.01, 0.05, 0.1],
+        k=5,
+        training_threshold=0.1,
+        max_iterations=1000,
+        test_split_ratio=0.80,
+        print_acc=False,
+        model_file="",
+    ):
+
+    plt.figure()
+
+    np.random.shuffle(data)
+    train_data, test_data = split_data(data, ratio=test_split_ratio)
+
+    # Initialize lists to store iteration and accuracy values
+    iteration_values = []
+    accuracy_values = []
+
+    for learning_rate in learning_rates:
+        create_model = lambda: LogisticRegression(
+            learning_rate=learning_rate,
+            regularization_lambda=0,
+        )
+        for iteration in range(max_iterations):
+            # Fit model using 5-fold cross validation
+            kfold_acc, _, _, _ = kfold_cross_validation(
+                train_data,
+                create_model,
+                k=k,
+                training_threshold=training_threshold,
+                max_iterations=iteration + 1,
+                model_file=model_file,
+                print_acc=print_acc
+            )
+            iteration_values.append(iteration + 1)
+            accuracy_values.append(kfold_acc)
+
+        # Plot accuracy vs. iterations for this learning rate
+        plt.plot(iteration_values, accuracy_values, marker='o', label=f"LR: {learning_rate}")
+
+    plt.xlabel("Iterations")
+    plt.ylabel("Accuracy")
+    plt.title("Accuracy vs. Iterations for Different Learning Rates")
+    plt.legend()
+    plt.show()
+
 
 def plot_accuracy_size():
     pass
