@@ -18,13 +18,14 @@ class LogisticRegression(ModelInterface):
     def _derivative_cost(self, param, param_x: np.ndarray, y: np.ndarray, y_pred: np.ndarray):
         return np.mean((y_pred - y) * param_x) + ((self.regularization_lambda * param) / len(self.params))
 
-    def fit(self, train_data, train_labels, training_threshold=0.1, max_iterations=np.Inf, print_cost=False):
+    def fit(self, train_data, train_labels, cost_change_threshold=0.0001, max_iterations=np.Inf, min_iterations=500, print_cost=False) -> ModelInterface:
         self.params = np.random.rand(train_data.shape[1])
         self.b = np.random.rand(1)
 
         self.cost = np.Inf
         self.iterations = 0
-        while self.cost > training_threshold and self.iterations < max_iterations:
+        cost_change = np.Inf
+        while (cost_change > cost_change_threshold or self.iterations < min_iterations) and self.iterations < max_iterations:
             self.iterations += 1
             if print_cost and self.iterations % 200 == 0:
                 print(self.cost)
@@ -33,12 +34,16 @@ class LogisticRegression(ModelInterface):
             for i in range(train_data.shape[0]):
                 y_pred[i] = self._sigmoid(train_data[i])
 
-            self.cost = self._cost(train_labels, y_pred)
+            new_cost = self._cost(train_labels, y_pred)
+            cost_change = self.cost - new_cost
+            self.cost = new_cost
 
             for i in range(len(self.params)):
                 x = train_data[:, i]
                 self.params[i] -= self.learning_rate * self._derivative_cost(self.params[i], x, train_labels, y_pred)
                 self.b -= self.learning_rate * self._derivative_cost(0, 1, train_labels, y_pred)
+        
+        return self
 
     def predict(self, test_data, test_labels=None):
         y_pred = np.zeros(test_data.shape[0])
@@ -52,8 +57,8 @@ class LogisticRegression(ModelInterface):
         # Turn probabilities into a binary prediction
         return [1 if x > 0.5 else 0 for x in y_pred], test_cost if test_labels is not None else None
 
-    def load(self, args, params, b):
-        self.learning_rate = args[0]
-        self.regularization_lambda = args[1]
-        self.params = params
-        self.b = b
+    def Load(args, params, b) -> ModelInterface:
+        model = LogisticRegression(args[0], args[1])
+        model.params = params
+        model.b = b
+        return model

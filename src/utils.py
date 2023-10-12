@@ -1,3 +1,4 @@
+import numpy as np
 from model_interface import ModelInterface
 
 def split_data(data, ratio=0.95):
