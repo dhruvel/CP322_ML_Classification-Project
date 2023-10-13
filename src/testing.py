@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 from model_interface import ModelInterface
 from logistic_regression import LogisticRegression
-from utils import split_data, evaluate_acc, save_model
+from utils import split_data, evaluate_acc, save_model, find_model
 
 def kfold_cross_validation(
         data,
@@ -154,17 +154,19 @@ def find_best_logistic_model(
 
 def plot_accuracy_iterations(
         data,
+        existing_models,
         learning_rates=[0.005, 0.01, 0.05, 0.1],
         k=5,
-        training_threshold=0.1,
+        cost_change_threshold=0.0001,
         max_iterations=1000,
         test_split_ratio=0.80,
         print_acc=False,
         model_file="",
     ):
-
+    regularization_lambda = 0
     plt.figure()
 
+    # Initialize training data
     np.random.shuffle(data)
     train_data, test_data = split_data(data, ratio=test_split_ratio)
 
@@ -175,21 +177,41 @@ def plot_accuracy_iterations(
     for learning_rate in learning_rates:
         create_model = lambda: LogisticRegression(
             learning_rate=learning_rate,
-            regularization_lambda=0,
+            regularization_lambda=regularization_lambda,
         )
         for iteration in range(max_iterations):
-            # Fit model using 5-fold cross validation
-            kfold_acc, _, _, _ = kfold_cross_validation(
-                train_data,
-                create_model,
-                k=k,
-                training_threshold=training_threshold,
-                max_iterations=iteration + 1,
-                model_file=model_file,
-                print_acc=print_acc
+            model_params = find_model(
+                learning_rate, 
+                regularization_lambda,
+                cost_change_threshold,
+                iteration + 1,
+                train_data.shape[0],
+                existing_models
             )
+
+            if model_params is not None:
+                model = LogisticRegression(0, 0)
+                model.Load(
+                    args=[learning_rate, regularization_lambda],
+                    params=model_params['params'],
+                    b=model_params['b']
+                )
+            else:
+                # Fit model using 5-fold cross validation
+                _, model, _, _ = kfold_cross_validation(
+                    train_data,
+                    create_model,
+                    k=k,
+                    cost_change_threshold=cost_change_threshold,
+                    max_iterations=iteration + 1,
+                    model_file=model_file,
+                    print_acc=print_acc
+                )
+            predicted, test_cost = model.predict(test_data[:, :-1], test_data[:, -1])
+            accuracy = evaluate_acc(predicted, test_data[:, -1])
+
             iteration_values.append(iteration + 1)
-            accuracy_values.append(kfold_acc)
+            accuracy_values.append(accuracy)
 
         # Plot accuracy vs. iterations for this learning rate
         plt.plot(iteration_values, accuracy_values, marker='o', label=f"LR: {learning_rate}")
