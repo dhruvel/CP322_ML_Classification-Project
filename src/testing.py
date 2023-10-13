@@ -170,30 +170,33 @@ def plot_accuracy_iterations(
     np.random.shuffle(data)
     train_data, test_data = split_data(data, ratio=test_split_ratio)
 
-    # Initialize lists to store iteration and accuracy values
-    iteration_values = []
-    accuracy_values = []
+    colors = ['r', 'g', 'b', 'c', 'm']
 
-    for learning_rate in learning_rates:
+    for i, learning_rate in enumerate(learning_rates):
+        # Initialize lists to store iteration and accuracy values
+        iteration_values = []
+        accuracy_values = []
+
         create_model = lambda: LogisticRegression(
             learning_rate=learning_rate,
             regularization_lambda=regularization_lambda,
         )
-        for iteration in range(max_iterations):
+
+        for iteration in range(50, max_iterations, 50):
             model_params = find_model(
                 learning_rate, 
                 regularization_lambda,
                 cost_change_threshold,
-                iteration + 1,
-                train_data.shape[0],
-                existing_models
+                max_iterations=iteration,
+                # 4/5 folds will be the training points
+                training_points=train_data.shape[0] * 4 // 5,
+                models=existing_models
             )
 
             if model_params is not None:
-                model = LogisticRegression(0, 0)
-                model.Load(
+                model = LogisticRegression.Load(
                     args=[learning_rate, regularization_lambda],
-                    params=model_params['params'],
+                    params=np.array(model_params['params']),
                     b=model_params['b']
                 )
             else:
@@ -203,25 +206,25 @@ def plot_accuracy_iterations(
                     create_model,
                     k=k,
                     cost_change_threshold=cost_change_threshold,
-                    max_iterations=iteration + 1,
+                    max_iterations=iteration,
                     model_file=model_file,
                     print_acc=print_acc
                 )
             predicted, test_cost = model.predict(test_data[:, :-1], test_data[:, -1])
             accuracy = evaluate_acc(predicted, test_data[:, -1])
 
-            iteration_values.append(iteration + 1)
+            iteration_values.append(iteration)
             accuracy_values.append(accuracy)
 
         # Plot accuracy vs. iterations for this learning rate
-        plt.plot(iteration_values, accuracy_values, marker='o', label=f"LR: {learning_rate}")
+        plt.plot(iteration_values, accuracy_values, marker='.', label=f"LR: {learning_rate}", c=colors[i])
 
     plt.xlabel("Iterations")
     plt.ylabel("Accuracy")
     plt.title("Accuracy vs. Iterations for Different Learning Rates")
     plt.legend()
+    plt.ylim(0, 1)  # Set the y-axis limits
     plt.show()
-
 
 def plot_accuracy_size():
     pass
