@@ -340,5 +340,5 @@ arr[:, 43] = np.array([readmitted_classes.index(x) for x in arr[:, 43]])
 _, idx = np.unique(arr, axis=0, return_index=True)
 arr = arr[np.sort(idx)]
 
-with open("diabetic_data_clean.csv", "w") as f:
-    np.savetxt(f, arr, delimiter=",", fmt="%s")
+# with open("diabetic_data_clean.csv", "w") as f:
+#     np.savetxt(f, arr, delimiter=",", fmt="%s")
