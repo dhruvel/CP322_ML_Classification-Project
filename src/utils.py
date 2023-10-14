@@ -1,3 +1,4 @@
+import numpy as np
 from model_interface import ModelInterface
 
 def split_data(data, ratio=0.95):
@@ -25,8 +26,8 @@ def load_models(filename: str, arg_num: int):
             if len(values) <= 1 or values[0].startswith("#"):
                 continue
 
-            args = float(values[:arg_num])
-            params = float(values[arg_num:-1])
+            args = np.array([float(v) for v in values[:arg_num]])
+            params = np.array([float(v) for v in values[arg_num:-1]])
             b = float(values[-1])
             
             model = {
