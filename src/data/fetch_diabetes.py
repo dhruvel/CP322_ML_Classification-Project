@@ -7,14 +7,20 @@ arr = np.array(diabetes_data)
 # delete first row
 arr = np.delete(arr, 0, axis=0)
 
-# delete rows with too many missing values
-arr = arr[np.sum(arr == "?", axis=1) <= 5]
+# count number of missing values in each column
+# for i in range(arr.shape[1]):
+#     print(i, np.sum(arr[:, i] == "?"))
+
+# weight (5) column has 98569 missing values, although it would be an interesting feature, it is simply not existent for most patients
+# payer_code (10) column has 40256 missing values and is not useful
+# medical_specialty (11) column has 49949 missing values but could be an interesting feature
+
+# remove ID columns, weight, and payer_code columns
+arr = np.delete(arr, [0, 1, 5, 10], axis=1)
 
 # remove rows with missing values
 arr = arr[~np.any(arr == "?", axis=1)]
-
-# remove Column ID
-arr = np.delete(arr, [0, 1, 6, 7, 8, 19], axis=1)
+# with these removed there are 49735 rows left, enough for our purposes
 
 # encode race column
 race_classes = ["Caucasian", 
@@ -25,8 +31,7 @@ race_classes = ["Caucasian",
 arr[:, 0] = np.array([race_classes.index(x) for x in arr[:, 0]])
 
 # encode gender column
-gender_classes = ["Male", 
-                  "Female"]
+gender_classes = ["Male", "Female", "Unknown/Invalid"]
 arr[:, 1] = np.array([gender_classes.index(x) for x in arr[:, 1]])
 
 # encode age column
@@ -41,35 +46,6 @@ age_classes = ["[0-10)",
                "[80-90)", 
                "[90-100)"]
 arr[:, 2] = np.array([age_classes.index(x) for x in arr[:, 2]])
-
-# encode weight column
-weight_classes = ["[0-25)", 
-                  "[25-50)", 
-                  "[50-75)", 
-                  "[75-100)", 
-                  "[100-125)", 
-                  "[125-150)", 
-                  "[150-175)", 
-                  "[175-200)", 
-                  ">200"]
-arr[:, 3] = np.array([weight_classes.index(x) for x in arr[:, 3]])
-
-# encode payer_code column
-payer_code_classes = ["MC", 
-                      "MD", 
-                      "HM", 
-                      "UN", 
-                      "BC", 
-                      "SP", 
-                      "CP", 
-                      "SI", 
-                      "DM", 
-                      "CM", 
-                      "CH", 
-                      "PO", 
-                      "WC", 
-                      "OT"]
-arr[:, 5] = np.array([payer_code_classes.index(x) for x in arr[:, 5]])
 
 # encode medical_specialty column
 medical_specialty_classes = ["Pediatrics-Endocrinology",
@@ -145,200 +121,55 @@ medical_specialty_classes = ["Pediatrics-Endocrinology",
                             "DCPTEAM",
                             "Resident"
 ]
-arr[:, 6] = np.array([medical_specialty_classes.index(x) for x in arr[:, 6]])
+arr[:, 7] = np.array([medical_specialty_classes.index(x) for x in arr[:, 7]])
+
+# TODO: There's a lot of classes in these 3 columns, might want to normalize them
+# get all unique values in diag_1 column
+diag_1_classes = np.unique(arr[:, 14])
+# encode diag_1 column
+arr[:, 14] = np.array([np.where(diag_1_classes == x)[0][0] for x in arr[:, 14]])
+
+# get all unique values in diag_2 column
+diag_2_classes = np.unique(arr[:, 15])
+# encode diag_2 column
+arr[:, 15] = np.array([np.where(diag_2_classes == x)[0][0] for x in arr[:, 15]])
+
+# get all unique values in diag_3 column
+diag_3_classes = np.unique(arr[:, 16])
+# encode diag_3 column
+arr[:, 16] = np.array([np.where(diag_3_classes == x)[0][0] for x in arr[:, 16]])
 
 # encode max_glu_serum column
-max_glu_serum_classes = ["None"]
-arr[:, 16] = np.array([max_glu_serum_classes.index(x) for x in arr[:, 16]])
+max_glu_serum_classes = ["None", "Norm", ">200", ">300"]
+arr[:, 18] = np.array([max_glu_serum_classes.index(x) for x in arr[:, 18]])
 
 # encode A1Cresult column
-A1Cresult_classes = ["None", 
-                     ">7", 
-                     ">8", 
-                     "Norm"]
-arr[:, 17] = np.array([A1Cresult_classes.index(x) for x in arr[:, 17]])
+A1Cresult_classes = ["None", ">8", ">7", "Norm"]
+arr[:, 19] = np.array([A1Cresult_classes.index(x) for x in arr[:, 19]])
 
-# encode metformin column
-metformin_classes = ["No", 
-                     "Steady", 
-                     "Up", 
-                     "Down"]
-arr[:, 18] = np.array([metformin_classes.index(x) for x in arr[:, 18]])
-
-# encode repaglinide column
-repaglinide_classes = ["No", 
-                       "Steady", 
-                       "Up", 
-                       "Down"]
-arr[:, 19] = np.array([repaglinide_classes.index(x) for x in arr[:, 19]])
-
-# encode nateglinide column
-nateglinide_classes = ["No", 
-                       "Steady", 
-                       "Up", 
-                       "Down"]
-arr[:, 20] = np.array([nateglinide_classes.index(x) for x in arr[:, 20]])
-
-# encode chlorpropamide column
-chlorpropamide_classes = ["No", 
-                          "Steady", 
-                          "Up", 
-                          "Down"]
-arr[:, 21] = np.array([chlorpropamide_classes.index(x) for x in arr[:, 21]])
-
-# encode glimepiride column
-glimepiride_classes = ["No", 
-                       "Steady", 
-                       "Up", 
-                       "Down"]
-arr[:, 22] = np.array([glimepiride_classes.index(x) for x in arr[:, 22]])
-
-# encode acetohexamide column
-acetohexamide_classes = ["No", 
-                         "Steady", 
-                         "Up", 
-                         "Down"]
-arr[:, 23] = np.array([acetohexamide_classes.index(x) for x in arr[:, 23]])
-
-# encode glipizide column
-glipizide_classes = ["No", 
-                     "Steady", 
-                     "Up", 
-                     "Down"]
-arr[:, 24] = np.array([glipizide_classes.index(x) for x in arr[:, 24]])
-
-# encode glyburide column
-glyburide_classes = ["No", 
-                     "Steady", 
-                     "Up", 
-                     "Down"]
-arr[:, 25] = np.array([glyburide_classes.index(x) for x in arr[:, 25]])
-
-# encode tolbutamide column
-tolbutamide_classes = ["No", 
-                       "Steady", 
-                       "Up", 
-                       "Down"]
-arr[:, 26] = np.array([tolbutamide_classes.index(x) for x in arr[:, 26]])
-
-# encode pioglitazone column
-pioglitazone_classes = ["No", 
-                        "Steady", 
-                        "Up", 
-                        "Down"]
-arr[:, 27] = np.array([pioglitazone_classes.index(x) for x in arr[:, 27]])
-
-# encode rosiglitazone column
-rosiglitazone_classes = ["No", 
-                         "Steady", 
-                         "Up", 
-                         "Down"]
-arr[:, 28] = np.array([rosiglitazone_classes.index(x) for x in arr[:, 28]])
-
-# encode acarbose column
-acarbose_classes = ["No", 
-                    "Steady", 
-                    "Up", 
-                    "Down"]
-arr[:, 29] = np.array([acarbose_classes.index(x) for x in arr[:, 29]])
-
-# encode miglitol column
-miglitol_classes = ["No", 
-                    "Steady", 
-                    "Up", 
-                    "Down"]
-arr[:, 30] = np.array([miglitol_classes.index(x) for x in arr[:, 30]])
-
-# encode troglitazone column
-troglitazone_classes = ["No", 
-                        "Steady", 
-                        "Up", 
-                        "Down"]
-arr[:, 31] = np.array([troglitazone_classes.index(x) for x in arr[:, 31]])
-
-# encode tolazamide column
-tolazamide_classes = ["No", 
-                      "Steady", 
-                      "Up", 
-                      "Down"]
-arr[:, 32] = np.array([tolazamide_classes.index(x) for x in arr[:, 32]])
-
-# encode examide column
-examide_classes = ["No", 
-                   "Steady", 
-                   "Up", 
-                   "Down"]
-arr[:, 33] = np.array([examide_classes.index(x) for x in arr[:, 33]])
-
-# encode citoglipton column
-citoglipton_classes = ["No", 
-                       "Steady", 
-                       "Up", 
-                       "Down"]
-arr[:, 34] = np.array([citoglipton_classes.index(x) for x in arr[:, 34]])
-
-# encode insulin column
-insulin_classes = ["No", 
-                   "Steady", 
-                   "Up", 
-                   "Down"]
-arr[:, 35] = np.array([insulin_classes.index(x) for x in arr[:, 35]])
-
-# encode glyburide-metformin column
-glyburide_metformin_classes = ["No", 
-                               "Steady", 
-                               "Up", 
-                               "Down"]
-arr[:, 36] = np.array([glyburide_metformin_classes.index(x) for x in arr[:, 36]])
-
-# encode glipizide-metformin column
-glipizide_metformin_classes = ["No", 
-                               "Steady", 
-                               "Up", 
-                               "Down"]
-arr[:, 37] = np.array([glipizide_metformin_classes.index(x) for x in arr[:, 37]])
-
-# encode glimepiride-pioglitazone column
-glimepiride_pioglitazone_classes = ["No", 
-                                    "Steady", 
-                                    "Up", 
-                                    "Down"]
-arr[:, 38] = np.array([glimepiride_pioglitazone_classes.index(x) for x in arr[:, 38]])
-
-# encode metformin-rosiglitazone column
-metformin_rosiglitazone_classes = ["No", 
-                                   "Steady", 
-                                   "Up", 
-                                   "Down"]
-arr[:, 39] = np.array([metformin_rosiglitazone_classes.index(x) for x in arr[:, 39]])
-
-# encode metformin-pioglitazone column
-metformin_pioglitazone_classes = ["No", 
-                                  "Steady", 
-                                  "Up", 
-                                  "Down"]
-arr[:, 40] = np.array([metformin_pioglitazone_classes.index(x) for x in arr[:, 40]])
+# encode rest of test and exam columns (columns 20 - 42)
+result_classes = ["No", "Up", "Down", "Steady"]
+for i in range(20, 43):
+    arr[:, i] = np.array([result_classes.index(x) for x in arr[:, i]])
 
 # encode change column
-change_classes = ["No", 
-                  "Ch"]
-arr[:, 41] = np.array([change_classes.index(x) for x in arr[:, 41]])
+change_classes = ["No", "Ch"]
+arr[:, 43] = np.array([change_classes.index(x) for x in arr[:, 43]])
 
 # encode diabetesMed column
-diabetesMed_classes = ["No", 
-                       "Yes"]
-arr[:, 42] = np.array([diabetesMed_classes.index(x) for x in arr[:, 42]])
+diabetesMed_classes = ["No", "Yes"]
+arr[:, 44] = np.array([diabetesMed_classes.index(x) for x in arr[:, 44]])
 
+# remove readmitted rows with "NO"
+arr = arr[arr[:, 45] != "NO"]
 # encode readmitted column
-readmitted_classes = ["NO", 
-                      ">30", 
-                      "<30"]
-arr[:, 43] = np.array([readmitted_classes.index(x) for x in arr[:, 43]])
-
+readmitted_classes = [">30", "<30"]
+arr[:, 45] = np.array([readmitted_classes.index(x) for x in arr[:, 45]])
 
 # remove duplicate rows
-_, idx = np.unique(arr, axis=0, return_index=True)
-arr = arr[np.sort(idx)]
+arr = np.unique(arr, axis=0)
+# make all values floats
+arr = arr.astype(np.float)
 
 # Remove diag_1 and diag_3 columns
 arr = np.delete(arr, [13, 14], axis=1)
