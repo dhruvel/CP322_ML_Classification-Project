@@ -190,7 +190,7 @@ def plot_accuracy_iterations(
                 cost_change_threshold,
                 max_iterations=iteration,
                 # 4/5 folds will be the training points
-                training_points=train_data.shape[0] * 4 // 5,
+                training_points=int(len(train_data) / k) * (k - 1),
                 models=existing_models
             )
 

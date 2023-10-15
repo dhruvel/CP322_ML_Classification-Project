@@ -4,7 +4,9 @@ from model_interface import ModelInterface
 # Number of vars before params
 ARG_COUNT = {
     "adult_models.csv": 8,
-    "ionosphere_models.csv": 8
+    "ionosphere_models.csv": 8,
+    "diabetes_models.csv": 8,
+    "spambase_models.csv": 8,
 }
 
 def split_data(data, ratio=0.95):
