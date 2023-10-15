@@ -171,5 +171,10 @@ arr = np.unique(arr, axis=0)
 # make all values floats
 arr = arr.astype(np.float)
 
+# Remove diag_1 and diag_3 columns
+arr = np.delete(arr, [13, 14], axis=1)
+        
+arr = arr.astype(float)
+
 # with open("diabetic_data_clean.csv", "w") as f:
 #     np.savetxt(f, arr, delimiter=",", fmt="%s")

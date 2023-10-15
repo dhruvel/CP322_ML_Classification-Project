@@ -1,8 +1,10 @@
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import math as m
 import random
 from collections import Counter
+from data.data_all import adult_data, ionosphere_data, diabetes_data, spambase_data
 import time
 
 class KNNClassifier:
@@ -122,7 +124,33 @@ class KNNClassifier:
         plt.xticks(x,x)
         plt.show()
         return
-            
+
+    def saveKplot(self, filename):
+        if len(self.kAcc) == 0:
+            print("no K accuracy data: Run K function first ")
+            return
+        plt.clf()
+        x = [i for i in range(1,21)]
+        plt.title(f"K accuracy data with columns {self.col1+1} and {self.col2+1}")
+        plt.scatter(x,self.kAcc)
+        plt.plot(x,self.kAcc)
+        plt.xticks(x,x)
+        save_path = f'/Users/levivanv/Downloads/{filename}'
+        if not os.path.exists(save_path):
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)
+
+num = 1
+_, cols = diabetes_data.shape
+for i in range(cols):
+  for j in range(i+1, cols):
+    start = time.time()
+    temp = KNNClassifier(diabetes_data, i, j, 1)
+    temp.findBestK()
+    end = time.time()
+    filename = f'Diabetes_{i}_{j}.png'
+    temp.saveKplot(filename)
+    
 
 ## UNCOMMENT FROM HERE TO NEXT END FOR ADULT DATA RESULTS
 # adultData = np.loadtxt("data\\adult\\adult.data", delimiter=',', dtype='str')
