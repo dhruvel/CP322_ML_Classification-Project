@@ -39,7 +39,7 @@ def kfold_cross_validation(
     cost_diffs = []
     best_acc = 0
     best_cost = np.Inf
-    best_cost_model: ModelInterface = None
+    least_cost_model: ModelInterface = None
     accurate_model: ModelInterface = None
     for i in range(len(results)):
         # Test models on remaining fold with cross-validation data
@@ -155,14 +155,11 @@ def find_best_logistic_model(
 def plot_accuracy_iterations(
         data,
         data_name,
-        existing_models,
         learning_rates=[0.005, 0.01, 0.05, 0.1],
-        k=5,
         cost_change_threshold=0.0001,
         max_iterations=1000,
         test_split_ratio=0.80,
-        print_acc=False,
-        model_file="",
+        print_Progress=False,
     ):
     regularization_lambda = 0
     plt.figure()
@@ -175,57 +172,36 @@ def plot_accuracy_iterations(
 
     for i, learning_rate in enumerate(learning_rates):
         # Initialize lists to store iteration and accuracy values
-        iteration_values = []
-        accuracy_values = []
-
-        create_model = lambda: LogisticRegression(
+        model = LogisticRegression(
             learning_rate=learning_rate,
             regularization_lambda=regularization_lambda,
         )
 
-        for iteration in range(50, max_iterations, 50):
-            model_params = find_model(
-                learning_rate, 
-                regularization_lambda,
-                cost_change_threshold,
-                max_iterations=iteration,
-                # 4/5 folds will be the training points
-                training_points=int(len(train_data) / k) * (k - 1),
-                models=existing_models
-            )
+        model.fit(
+            train_data[:, :-1],
+            train_data[:, -1],
+            cost_change_threshold=cost_change_threshold,
+            max_iterations=max_iterations,
+            test_data=test_data[:, :-1],
+            test_labels=test_data[:, -1],
+        )
 
-            if model_params is not None:
-                model = LogisticRegression.Load(
-                    args=[learning_rate, regularization_lambda],
-                    params=np.array(model_params['params']),
-                    b=model_params['b']
-                )
-            else:
-                # Fit model using 5-fold cross validation
-                _, model, _, _ = kfold_cross_validation(
-                    train_data,
-                    create_model,
-                    k=k,
-                    cost_change_threshold=cost_change_threshold,
-                    max_iterations=iteration,
-                    model_file=model_file,
-                    print_acc=print_acc
-                )
-            predicted, test_cost = model.predict(test_data[:, :-1], test_data[:, -1])
-            accuracy = evaluate_acc(predicted, test_data[:, -1])
-
-            iteration_values.append(iteration)
-            accuracy_values.append(accuracy)
+        if print_Progress:
+            print("Learning rate: {}, Lambda: {}, Accuracy: {}".format(
+                    learning_rate,
+                    regularization_lambda,
+                    model.accuracies[-1]
+                ))
 
         # Plot accuracy vs. iterations for this learning rate
-        plt.plot(iteration_values, accuracy_values, marker='.', label=f"LR: {learning_rate}", c=colors[i])
+        plt.plot(range(0, max_iterations), model.accuracies, marker='.', label=f"LR: {learning_rate}", c=colors[i])
 
     plt.xlabel("Iterations")
     plt.ylabel("Accuracy")
     plt.title(f"Accuracy vs. Iterations for Different Learning Rates, {data_name} Data")
     plt.legend()
     plt.ylim(0, 1)  # Set the y-axis limits
-    plt.show()
+    plt.savefig("accuracy_vs_iterations.png")
 
 def plot_accuracy_size():
     pass

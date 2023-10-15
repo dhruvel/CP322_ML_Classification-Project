@@ -1,4 +1,5 @@
 import numpy as np
+from utils import evaluate_acc
 from model_interface import ModelInterface
 
 class LogisticRegression(ModelInterface):
@@ -18,10 +19,11 @@ class LogisticRegression(ModelInterface):
     def _derivative_cost(self, param, param_x: np.ndarray, y: np.ndarray, y_pred: np.ndarray):
         return np.mean((y_pred - y) * param_x) + ((self.regularization_lambda * param) / len(self.params))
 
-    def fit(self, train_data, train_labels, cost_change_threshold=0.0001, max_iterations=np.Inf, min_iterations=500, print_cost=False) -> ModelInterface:
+    def fit(self, train_data, train_labels, cost_change_threshold=0.0001, max_iterations=np.Inf, min_iterations=500, print_cost=False, test_data=None, test_labels=None) -> ModelInterface:
         self.params = np.random.rand(train_data.shape[1])
         self.b = np.random.rand(1)
 
+        self.accuracies = []
         self.cost = np.Inf
         self.iterations = 0
         cost_change = np.Inf
@@ -42,6 +44,11 @@ class LogisticRegression(ModelInterface):
                 x = train_data[:, i]
                 self.params[i] -= self.learning_rate * self._derivative_cost(self.params[i], x, train_labels, y_pred)
                 self.b -= self.learning_rate * self._derivative_cost(0, 1, train_labels, y_pred)
+
+            if test_data is not None and test_labels is not None:
+                predicted, _ = self.predict(test_data)
+                accuracy = evaluate_acc(predicted, test_labels)
+                self.accuracies.append(accuracy)
         
         return self
 
