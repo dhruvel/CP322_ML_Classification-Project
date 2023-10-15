@@ -28,7 +28,7 @@ class KNNClassifier:
         #2D array where the first point in each row is the centre for that cluster
         self.clusters = []
         
-    def getDistance(self,first, second):
+    def _getDistance(self,first, second):
         return m.sqrt((second[0] - first[0]) ** 2 + (second[1] - first[1]) ** 2)
     
     def assignCentres(self):
@@ -66,6 +66,27 @@ class KNNClassifier:
             
 
         return
+    
+    # assuming the input is a list of tuples [(point,class)]
+    def classifyNewPoint(self,points: list,newPoint: list,k:int,numOfClasses: int):
+
+
+        distances = []
+        for tuple in points:
+            print(tuple[0])
+            distances.append((self._getDistance(self,newPoint,tuple[0]),tuple[1]))
+        
+        distances = sorted(distances,key=lambda pair:pair[0])
+
+        outputfreq = [0 for _ in range(numOfClasses)]
+
+        for neighbor in distances[0:k]:
+            outputfreq[neighbor[1]] +=1
+        
+        return outputfreq.index(max(outputfreq))
+
+
+
     
     def newCentres(self):
         if len(self.clusters) == 0:
@@ -139,8 +160,18 @@ data = [
 x = [i[0] for i in data]
 y = [i[1] for i in data]
 
-example = KNNClassifier(data,2)
+insert = []
+for point in data:
+    insert.append((point,random.randint(0,1)))
+# print(insert)
+print()
+newPoint = (4,5)
 
-example.runKNN(8,9)
-plt.scatter(x,y)
-plt.show()
+print(KNNClassifier.classifyNewPoint(KNNClassifier,insert,newPoint,4,1))
+
+
+# example = KNNClassifier(data,2)
+
+# example.runKNN(8,9)
+# plt.scatter(x,y)
+# plt.show()

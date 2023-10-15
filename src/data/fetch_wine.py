@@ -10,4 +10,3 @@ arr = arr[~np.any(arr == " ?", axis=1)]
 
 # remove duplicate rows
 arr = np.unique(arr, axis=0)
-
