@@ -16,4 +16,4 @@ arr[arr == "b"] = 0
 arr[arr == "g"] = 1
 
 # make all values floats
-arr = arr.astype(np.float)
+arr = arr.astype(float)

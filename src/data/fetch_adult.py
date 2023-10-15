@@ -159,7 +159,7 @@ labels[labels == ">50K"] = 1
 arr[:, -1] = labels
 
 # make all values floats
-arr = arr.astype(np.float)
+arr = arr.astype(float)
 
 # normalize fnlwgt, capital-gain, capital-loss
 arr[:, 2] = (arr[:, 2] - np.mean(arr[:, 2])) / np.std(arr[:, 2])
