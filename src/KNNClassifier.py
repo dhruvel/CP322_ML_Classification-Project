@@ -111,7 +111,9 @@ class KNNClassifier:
             print(kAccuracy)
         
         print(f"Acurracy: {correct/length}")    
+        best_k = max(kAccuracy)
         self.kAcc = kAccuracy
+        return best_k
             
     def showKplot(self):
         if len(self.kAcc) == 0:
@@ -141,15 +143,20 @@ class KNNClassifier:
         plt.savefig(save_path)
 
 num = 1
+best_k = None
+best_cols = None
 _, cols = diabetes_data.shape
 for i in range(cols):
-  for j in range(i+1, cols):
-    start = time.time()
-    temp = KNNClassifier(diabetes_data, i, j, 1)
-    temp.findBestK()
-    end = time.time()
-    filename = f'Diabetes_{i}_{j}.png'
-    temp.saveKplot(filename)
+    for j in range(i+1, cols):
+        start = time.time()
+        temp = KNNClassifier(diabetes_data, i, j, 1)
+        new_best_k = temp.findBestK()
+        if best_k is None or new_best_k > best_k:
+            best_k = new_best_k
+            best_cols = (i, j)
+            filename = f'Diabetes_{i}_{j}.png'
+            temp.saveKplot(filename)
+        end = time.time()
     
 
 ## UNCOMMENT FROM HERE TO NEXT END FOR ADULT DATA RESULTS
