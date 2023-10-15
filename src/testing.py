@@ -154,6 +154,7 @@ def find_best_logistic_model(
 
 def plot_accuracy_iterations(
         data,
+        data_name,
         existing_models,
         learning_rates=[0.005, 0.01, 0.05, 0.1],
         k=5,
@@ -221,7 +222,7 @@ def plot_accuracy_iterations(
 
     plt.xlabel("Iterations")
     plt.ylabel("Accuracy")
-    plt.title("Accuracy vs. Iterations for Different Learning Rates")
+    plt.title(f"Accuracy vs. Iterations for Different Learning Rates, {data_name} Data")
     plt.legend()
     plt.ylim(0, 1)  # Set the y-axis limits
     plt.show()

@@ -1,7 +1,7 @@
 import numpy as np
 
 # fetch dataset
-diabetes_data = np.loadtxt("CP322_ML_Classification-Project/data/diabetes/diabetic_data.csv", delimiter=',', dtype='str')
+diabetes_data = np.loadtxt("../data/diabetes/diabetic_data.csv", delimiter=',', dtype='str')
 arr = np.array(diabetes_data)
 
 # delete first row
@@ -339,6 +339,11 @@ arr[:, 43] = np.array([readmitted_classes.index(x) for x in arr[:, 43]])
 # remove duplicate rows
 _, idx = np.unique(arr, axis=0, return_index=True)
 arr = arr[np.sort(idx)]
+
+# Remove diag_1 and diag_3 columns
+arr = np.delete(arr, [13, 14], axis=1)
+        
+arr = arr.astype(float)
 
 # with open("diabetic_data_clean.csv", "w") as f:
 #     np.savetxt(f, arr, delimiter=",", fmt="%s")
