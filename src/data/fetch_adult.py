@@ -7,8 +7,6 @@ arr = np.array(adult_data)
 
 # remove rows with missing values
 arr = arr[~np.any(arr == " ?", axis=1)]
-# remove duplicate rows
-arr = np.unique(arr, axis=0)
 # trim whitespace
 arr = np.char.strip(arr)
 

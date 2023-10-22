@@ -8,9 +8,6 @@ arr = np.array(ionosphere_data)
 # remove rows with missing values
 arr = arr[~np.any(arr == " ?", axis=1)]
 
-# remove duplicate rows
-arr = np.unique(arr, axis=0)
-
 # convert labels to binary
 arr[arr == "b"] = 0
 arr[arr == "g"] = 1
