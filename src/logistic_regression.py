@@ -19,7 +19,18 @@ class LogisticRegression(ModelInterface):
     def _derivative_cost(self, param, param_x: np.ndarray, y: np.ndarray, y_pred: np.ndarray):
         return np.mean((y_pred - y) * param_x) + ((self.regularization_lambda * param) / len(self.params))
 
-    def fit(self, train_data, train_labels, cost_change_threshold=0.0001, max_iterations=np.Inf, min_iterations=500, print_cost=False, test_data=None, test_labels=None) -> ModelInterface:
+    def fit(
+        self,
+        train_data,
+        train_labels,
+        cost_change_threshold=0.0001,
+        max_iterations=np.Inf,
+        min_iterations=500,
+        print_cost=False,
+        test_data=None,
+        test_labels=None,
+        iterations_between_accuracies=1
+    ) -> ModelInterface:
         self.params = np.random.rand(train_data.shape[1])
         self.b = np.random.rand(1)
 
@@ -28,7 +39,6 @@ class LogisticRegression(ModelInterface):
         self.iterations = 0
         cost_change = np.Inf
         while (cost_change > cost_change_threshold or self.iterations < min_iterations) and self.iterations < max_iterations:
-            self.iterations += 1
             if print_cost and self.iterations % 200 == 0:
                 print(self.cost)
 
@@ -46,9 +56,12 @@ class LogisticRegression(ModelInterface):
                 self.b -= self.learning_rate * self._derivative_cost(0, 1, train_labels, y_pred)
 
             if test_data is not None and test_labels is not None:
-                predicted, _ = self.predict(test_data)
-                accuracy = evaluate_acc(predicted, test_labels)
-                self.accuracies.append(accuracy)
+                if self.iterations % iterations_between_accuracies == 0:
+                    predicted, _ = self.predict(test_data)
+                    accuracy = evaluate_acc(predicted, test_labels)
+                    self.accuracies.append(accuracy)
+
+            self.iterations += 1
         
         return self
 

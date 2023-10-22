@@ -1,5 +1,5 @@
-from testing import plot_accuracy_iterations
-from data.data_all import adult_data, ionosphere_data, diabetes_data, spambase_data
+from testing import plot_accuracy_iterations, plot_accuracy_cost_threshold
+from data.data_all import ionosphere_data, adult_data, diabetes_data, spambase_data
 from utils import load_models
 
 def plot(data, data_name):
@@ -17,6 +17,40 @@ def plot(data, data_name):
         print_Progress=True,
     )
 
+def plot_all_accuracy_cost_threshold():
+    cost_change_thresholds = [0.00001, 0.0001, 0.001]
+
+    # ionosphere data
+    plot_accuracy_cost_threshold(
+        ionosphere_data,
+        "Ionosphere",
+        regularization_lambda=0.01,
+        cost_change_thresholds=cost_change_thresholds,
+        print_Progress=True,
+    )
+
+    # adult data
+    plot_accuracy_cost_threshold(
+        adult_data,
+        "Adult",
+        regularization_lambda=0.5,
+        max_iterations=5000,
+        test_split_ratio=0.85,
+        cost_change_thresholds=cost_change_thresholds,
+        print_Progress=True,
+    )
+
+    # diabetes data
+    plot_accuracy_cost_threshold(
+        diabetes_data,
+        "Diabetes",
+        regularization_lambda=0.03,
+        max_iterations=5000,
+        test_split_ratio=0.85,
+        cost_change_thresholds=cost_change_thresholds,
+        print_Progress=True,
+    )
+
 '''# Load the dataset for testing size scaling
 max_dataset_size = 2000  # Adjust as needed
 
@@ -25,6 +59,7 @@ plot_accuracy_size(model_instance, train_data, max_dataset_size)'''
 
 if __name__ == '__main__':
     # plot(adult_data, "Adult")
-    plot(ionosphere_data, "Ionosphere")
-#   plot(diabetes_data, "Diabetes")
-#   plot(spambase_data, "Spambase")
+    # plot(ionosphere_data, "Ionosphere")
+    # plot(diabetes_data, "Diabetes")
+    # plot(spambase_data, "Spambase")
+    plot_all_accuracy_cost_threshold()

@@ -193,14 +193,63 @@ def plot_accuracy_iterations(
                 ))
 
         # Plot accuracy vs. iterations for this learning rate
-        plt.plot(range(0, max_iterations), model.accuracies, marker='.', label=f"LR: {learning_rate}", c=colors[i])
+        plt.plot(range(0, model.iterations), model.accuracies, marker='.', label=f"LR: {learning_rate}", c=colors[i])
 
     plt.xlabel("Iterations")
     plt.ylabel("Accuracy")
     plt.title(f"Accuracy vs. Iterations for Different Learning Rates, {data_name} Data")
     plt.legend()
     plt.ylim(0, 1)  # Set the y-axis limits
-    plt.savefig("accuracy_vs_iterations.png")
+    plt.savefig("accuracy_vs_iterations_{}.png".format(data_name.lower()))
 
-def plot_accuracy_size():
-    pass
+def plot_accuracy_cost_threshold(
+        data,
+        data_name,
+        learning_rate=0.001,
+        regularization_lambda=0.5,
+        cost_change_thresholds=[0.00001, 0.0001, 0.001],
+        max_iterations=15000,
+        test_split_ratio=0.95,
+        print_Progress=False,
+    ):
+    plt.figure()
+
+    # Initialize training data
+    np.random.shuffle(data)
+    train_data, test_data = split_data(data, ratio=test_split_ratio)
+
+    colors = ['r', 'g', 'b', 'c', 'm']
+    iterations_between_accuracies = 10
+
+    for i, cost_change_threshold in enumerate(cost_change_thresholds):
+        model = LogisticRegression(
+            learning_rate=learning_rate,
+            regularization_lambda=regularization_lambda,
+        )
+
+        model.fit(
+            train_data[:, :-1],
+            train_data[:, -1],
+            cost_change_threshold=cost_change_threshold,
+            max_iterations=max_iterations,
+            test_data=test_data[:, :-1],
+            test_labels=test_data[:, -1],
+            iterations_between_accuracies=iterations_between_accuracies,
+        )
+
+        if print_Progress:
+            print("Data: {}, Cost Change Threshold: {}, Accuracy: {}".format(
+                    data_name,
+                    cost_change_threshold,
+                    model.accuracies[-1]
+                ))
+
+        # Plot accuracy vs. iterations for this cost change threshold
+        plt.plot(range(0, model.iterations, iterations_between_accuracies), model.accuracies, marker='.', label=f"CCT: {cost_change_threshold}", c=colors[i])
+
+    plt.xlabel("Iterations")
+    plt.ylabel("Accuracy")
+    plt.title(f"Accuracy vs. Iterations for Different Cost Change Thresholds\n{data_name} Data")
+    plt.legend()
+    # plt.ylim(max(min(model.accuracies) - 0.1, 0), min(max(model.accuracies) + 0.1, 1))  # Set the y-axis limits
+    plt.savefig("../graphs/accuracy_vs_iterations_{}.png".format(data_name.lower()))
