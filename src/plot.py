@@ -51,6 +51,16 @@ def plot_all_accuracy_cost_threshold():
         print_Progress=True,
     )
 
+    # spambase data
+    plot_accuracy_cost_threshold(
+        spambase_data,
+        "Spambase",
+        regularization_lambda=0.01,
+        test_split_ratio=0.9,
+        cost_change_thresholds=cost_change_thresholds,
+        print_Progress=True,
+    )
+
 '''# Load the dataset for testing size scaling
 max_dataset_size = 2000  # Adjust as needed
 
@@ -59,7 +69,7 @@ plot_accuracy_size(model_instance, train_data, max_dataset_size)'''
 
 if __name__ == '__main__':
     # plot(adult_data, "Adult")
-    # plot(ionosphere_data, "Ionosphere")
     # plot(diabetes_data, "Diabetes")
     # plot(spambase_data, "Spambase")
-    plot_all_accuracy_cost_threshold()
+    # plot_all_accuracy_cost_threshold()
+    pass
