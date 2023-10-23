@@ -4,9 +4,6 @@ import numpy as np
 spambase_data = np.loadtxt("../data/spambase/spambase.data", delimiter=',')
 arr = np.array(spambase_data)
 
-# remove duplicate rows
-arr = np.unique(arr, axis=0)
-
 # normalize capital_run_length_average, capital_run_length_longest, capital_run_length_total columns
 arr[:, 54] = (arr[:, 54] - np.mean(arr[:, 54])) / np.std(arr[:, 54])
 arr[:, 55] = (arr[:, 55] - np.mean(arr[:, 55])) / np.std(arr[:, 55])
