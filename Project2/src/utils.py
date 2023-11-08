@@ -1,6 +1,10 @@
+import numpy as np
+
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
 
 from newsgroup_data import newsgroup_train
 from imdb_data import imdb_train
@@ -48,3 +52,14 @@ Example Usage:
 """
 def train_imdb_classifier(classifier, print_debug=False):
     return _train_classifier(classifier, imdb_train, print_debug)
+
+"""
+Example Usage:
+    from sklearn.naive_bayes import MultinomialNB
+    clf = train_imdb_classifier(MultinomialNB(), print_debug=True)
+    print(cross_validate_score(clf, imdb_train))
+"""
+def cross_validate_score(classifier, train_data, k=5):
+    kfold = KFold(n_splits=k, shuffle=True)
+    scores = cross_val_score(classifier, train_data.data, train_data.target, cv=kfold)
+    return np.mean(scores)

@@ -12,7 +12,7 @@ def _save_to_csv():
 
     # Load train and test data
     imdb_train = load_files(
-        container_path='../../data/aclImdb/train',
+        container_path='../data/aclImdb/train',
         categories=['pos', 'neg'],
         shuffle=True,
         random_state=0,
@@ -26,7 +26,7 @@ def _save_to_csv():
     }).drop_duplicates()
 
     imdb_test = load_files(
-        container_path='../../data/aclImdb/test',
+        container_path='../data/aclImdb/test',
         categories=['pos', 'neg'],
         shuffle=True,
         random_state=0,
@@ -40,13 +40,13 @@ def _save_to_csv():
     }).drop_duplicates()
 
     # Save to CSV file
-    imdb_train.to_csv('../../data/aclImdb/train.csv', index=False)
-    imdb_test.to_csv('../../data/aclImdb/test.csv', index=False)
+    imdb_train.to_csv('../data/aclImdb/train.csv', index=False)
+    imdb_test.to_csv('../data/aclImdb/test.csv', index=False)
 
-if not os.path.exists('../../data/aclImdb/train.csv') or not os.path.exists('../../data/aclImdb/test.csv'):
+if not os.path.exists('../data/aclImdb/train.csv') or not os.path.exists('../data/aclImdb/test.csv'):
     print("Creating IMDB CSVs... this will only happen once.")
     _save_to_csv()
 
-imdb_train = pd.read_csv('../../data/aclImdb/train.csv')
-imdb_test = pd.read_csv('../../data/aclImdb/test.csv')
+imdb_train = pd.read_csv('../data/aclImdb/train.csv')
+imdb_test = pd.read_csv('../data/aclImdb/test.csv')
 print("Loaded IMDB data (train: {}, test: {})".format(len(imdb_train), len(imdb_test)))
