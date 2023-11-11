@@ -54,13 +54,3 @@ def plot_accuracy_over_param(
     if file_name is None:
         file_name = f"{classifier.__class__.__name__}-{param}_accuracy"
     plt.savefig(f"../plots/{file_name}.png")
-
-from newsgroup_data import newsgroup_train
-from sklearn.naive_bayes import MultinomialNB
-plot_accuracy_over_param(
-    MultinomialNB(),
-    newsgroup_train,
-    'alpha',
-    [0.1, 0.5, 1.0, 1.5, 2.0],
-    print_debug=True,
-)
