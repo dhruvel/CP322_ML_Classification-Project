@@ -27,5 +27,7 @@ plot_accuracy_over_param(LogisticRegression(),
 #         'C': [4]  
 #     }
 # clf = train_imdb_classifier(LogisticRegression(), print_debug=True, params=params)
+# best_C = clf.best_params_['clf__C']
+# print(f"Best C value: {best_C}")
 # print(clf.cv_results_)
 # #  'mean_test_score': array([0.89475565])

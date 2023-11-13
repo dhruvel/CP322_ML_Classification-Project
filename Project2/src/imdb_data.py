@@ -3,9 +3,9 @@ import pandas as pd
 import os
 
 """
-imdb_train: training data from IMDB
-imdb_test: testing data from IMDB
-imdb_all: all data from IMDB
+- imdb_train: training data
+- imdb_test: testing data
+- imdb_all: all data
 """
 
 # Make sure we are running from Project2/src
