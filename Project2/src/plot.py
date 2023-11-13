@@ -59,10 +59,10 @@ def plot_accuracy_over_param(
 
 from newsgroup_data import newsgroup_train
 from sklearn.naive_bayes import MultinomialNB
-# plot_accuracy_over_param(
-#     MultinomialNB(),
-#     newsgroup_train,
-#     'alpha',
-#     [0.1, 0.5, 1.0, 1.5, 2.0],
-#     print_debug=True,
-# )
+plot_accuracy_over_param(
+    MultinomialNB(),
+    newsgroup_train,
+    'alpha',
+    [0.1, 0.5, 1.0, 1.5, 2.0],
+    print_debug=True,
+)

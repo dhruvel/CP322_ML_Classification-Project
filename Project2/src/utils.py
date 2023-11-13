@@ -53,6 +53,8 @@ def _train_classifier_params(classifier, train_data, params, print_debug=False) 
     # Run grid search to find best hyperparameters
     grid_search_clf = GridSearchCV(pipeline, params, n_jobs=-1, verbose=print_debug)
     grid_search_clf.fit(train_data.data, train_data.target)
+    best_C = grid_search_clf.best_params_['clf__C']
+    print(f"Best C value: {best_C}")
     return grid_search_clf
 
 """
