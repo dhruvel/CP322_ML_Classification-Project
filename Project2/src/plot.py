@@ -54,3 +54,5 @@ def plot_accuracy_over_param(
     if file_name is None:
         file_name = f"{classifier.__class__.__name__}-{param}_accuracy"
     plt.savefig(f"../plots/{file_name}.png")
+    # plt.show()
+    return accuracies

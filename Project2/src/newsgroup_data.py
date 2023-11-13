@@ -5,9 +5,9 @@ import os
 from data_utils import split_data
 
 """
-newsgroup_train: training data from 20newsgroups
-newsgroup_test: testing data from 20newsgroups
-newsgroup_all: all data from 20newsgroups
+- newsgroup_train: training data
+- newsgroup_test: testing data
+- newsgroup_all: all data
 """
 
 # Make sure we are running from Project2/src

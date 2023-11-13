@@ -1,0 +1,6 @@
+{
+  "imdb":
+    {"ccp_alpha": 0.0, "class_weight": null, "criterion": "entropy", "max_depth": 20, "max_features": null, "max_leaf_nodes": null, "min_impurity_decrease": 0.0, "min_samples_leaf": 40, "min_samples_split": 8, "min_weight_fraction_leaf": 0.0025, "random_state": null, "splitter": "best"}, 
+  "news":
+    {"ccp_alpha": 0.0, "class_weight": null, "criterion": "gini", "max_depth": 350, "max_features": null, "max_leaf_nodes": null, "min_impurity_decrease": 0.0, "min_samples_leaf": 5, "min_samples_split": 100, "min_weight_fraction_leaf": 0.0, "random_state": null, "splitter": "best"}
+}

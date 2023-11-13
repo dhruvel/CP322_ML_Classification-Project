@@ -13,12 +13,12 @@ from imdb_data import imdb_train, imdb_all
 
 """
 Functions in this file:
-    train_newsgroup_classifier(classifier, params=None, print_debug=False)
-    train_imdb_classifier(classifier, params=None, print_debug=False)
-    cross_validate_score(classifier, train_data, k=5)
-    find_classifier_accuracy(classifier, test_data)
-    test_newsgroup_data_splits(classifier, ratios=[0.25, 0.50, 0.75, 0.95], print_debug=False)
-    test_imdb_data_splits(classifier, ratios=[0.25, 0.50, 0.75, 0.95], print_debug=False)
+    - train_newsgroup_classifier(classifier, params=None, print_debug=False)
+    - train_imdb_classifier(classifier, params=None, print_debug=False)
+    - cross_validate_score(classifier, train_data, k=5)
+    - find_classifier_accuracy(classifier, test_data)
+    - test_newsgroup_data_splits(classifier, ratios=[0.25, 0.50, 0.75, 0.95], print_debug=False)
+    - test_imdb_data_splits(classifier, ratios=[0.25, 0.50, 0.75, 0.95], print_debug=False)
 
 Usage:
     1. Use train_newsgroup_classifier and train_imdb_classifier to train classifiers on the data.
