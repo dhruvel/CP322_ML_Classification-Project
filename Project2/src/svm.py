@@ -54,9 +54,35 @@ for name, classifier in classifiers_20.items():
     for ratio, accuracy in zip(ratios, split_test_results):
         print(f"{name} - Ratio: {ratio}, Accuracy: {accuracy}")
 
-c_values = [0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.25]
+def plot_accuracy_for_categorical_param(classifier, train_data, param, param_vals, file_name=None, print_debug=False):
+    accuracies = []
+    for val in param_vals:
+        # Set the parameters correctly
+        if param == 'penalty' and val == 'l1':
+            classifier.set_params(**{param: val, 'dual': False})
+        else:
+            classifier.set_params(**{param: val})
 
-# Plot for IMDb Dataset
+        # Train and evaluate
+        pipeline = train_imdb_classifier(classifier, print_debug=print_debug)  # Update function as needed
+        accuracy = cross_validate_score(pipeline, train_data, k=5)
+        accuracies.append(accuracy)
+
+    # Plot
+    plt.figure()
+    plt.bar(param_vals, accuracies)
+    plt.xlabel(param)
+    plt.ylabel("Accuracy")
+
+    if file_name is None:
+        file_name = f"{classifier.__class__.__name__}-{param}_accuracy"
+    plt.savefig(f"../plots/{file_name}.png")
+
+c_values = [0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.25]
+tol_values = [1e-4, 1e-3, 1e-2]
+max_iter_values = [1000, 5000, 10000]
+penalty_values = ['l1', 'l2']  
+
 plot_accuracy_over_param(
     LinearSVC(),
     imdb_train,
@@ -66,12 +92,30 @@ plot_accuracy_over_param(
     print_debug=True
 )
 
-# Plot for 20 Newsgroups Dataset
+plot_accuracy_over_param(
+    LinearSVC(dual=False),  
+    newsgroup_train,
+    "tol",
+    tol_values,
+    file_name="newsgroup_Tol_Accuracy",
+    print_debug=True
+)
+
 plot_accuracy_over_param(
     LinearSVC(),
     newsgroup_train,
-    "C",
-    c_values,
-    file_name="Newsgroup_C_Accuracy",
+    "max_iter",
+    max_iter_values,
+    file_name="newsgroup_Max_Iter_Accuracy",
     print_debug=True
 )
+
+plot_accuracy_for_categorical_param(
+    LinearSVC(),
+    newsgroup_train,
+    "penalty",
+    ['l1', 'l2'],
+    file_name="newsgroup_Penalty_Accuracy",
+    print_debug=True
+)
+
