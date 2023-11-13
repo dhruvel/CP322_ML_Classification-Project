@@ -1,21 +1,43 @@
 import utils
 from sklearn.ensemble import AdaBoostClassifier
-from newsgroup_data import newsgroup_test
-import matplotlib.pyplot as plt
+from newsgroup_data import newsgroup_train,newsgroup_test
+from imdb_data import imdb_test,imdb_train
+from plot import plot_accuracy_over_param
+from utils import find_classifier_accuracy, train_imdb_classifier, train_newsgroup_classifier
 
-# from imdb_data import imdb_test
+# AdaBoost over different number of estimators
+# plot_accuracy_over_param(AdaBoostClassifier(),
+#  newsgroup_train,
+#  'n_estimators',
+#  [50,100,150,200],
+#  file_name="AdaBoostNewsgroup",
+#  print_debug=True
+#  )
 
-# Train the newsgroup classifier
-clf_1 = utils.train_newsgroup_classifier(AdaBoostClassifier(n_estimators=100))
+# plot_accuracy_over_param(AdaBoostClassifier(),
+#  imdb_train,
+#  'n_estimators',
+#  [50,100,150,200],
+#  file_name="AdaBoostIMDB",
+#  print_debug=True
+#  )
 
-# Train the IMDB classifier
-# clf_2 = utils.train_imdb_classifier(AdaBoostClassifier(n_estimators=100))
 
-# Predict the category of a movie review
-# print(clf_2.predict(['This movie was great!']))
+params = {
+ 'n_estimators': [200] #Best value
+}
+clf_1 = train_imdb_classifier(AdaBoostClassifier(), print_debug=True, params=params)
+print(clf_1.cv_results_)
+ # 'mean_test_score': array([0.84066823])
+clf_2 = train_newsgroup_classifier(AdaBoostClassifier(), print_debug=True, params=params)
+print(clf_2.cv_results_)
+# 'mean_test_score': array([0.4060969])
 
-# Predict the category of a newsgroup post
-print(clf_1.predict(['God is love']))
+# Find the final accuracies of each classifier
+accuracy_imdb = find_classifier_accuracy(clf_1, imdb_test)
+accuracy_newsgroup = find_classifier_accuracy(clf_2, newsgroup_test)
 
-print(utils.find_classifier_accuracy(clf_1, newsgroup_test))
-# print(utils.find_classifier_accuracy(clf_2, imdb_test))
+print(f"Final accuracy for IMDB: {accuracy_imdb}")
+# Final accuracy for IMDB: 0.849804443369219
+print(f"Final accuracy for Newsgroup: {accuracy_newsgroup}").
+# Final accuracy for Newsgroup: 0.4523187459177008
