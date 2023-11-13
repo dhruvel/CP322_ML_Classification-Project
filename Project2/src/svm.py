@@ -44,12 +44,10 @@ classifiers_20 = {"Default Classifier": svm_classifier, "Tuned Classifier": tune
 ratios = [0.25, 0.50, 0.75, 0.95]
 
 for name, pipeline in pipelines_20.items():
-    # Perform k-fold cross-validation
     k_fold_score = cross_validate_score(pipeline, imdb_test, k=5)
     print(f"K-Fold Cross-Validation Score for {name}: {k_fold_score}")
 
 for name, classifier in classifiers_20.items():
-    # Test the classifier with different data splits
     split_test_results = test_imdb_data_splits(classifier, ratios=ratios, print_debug=True)
     for ratio, accuracy in zip(ratios, split_test_results):
         print(f"{name} - Ratio: {ratio}, Accuracy: {accuracy}")
@@ -57,14 +55,13 @@ for name, classifier in classifiers_20.items():
 def plot_accuracy_for_categorical_param(classifier, train_data, param, param_vals, file_name=None, print_debug=False):
     accuracies = []
     for val in param_vals:
-        # Set the parameters correctly
         if param == 'penalty' and val == 'l1':
             classifier.set_params(**{param: val, 'dual': False})
         else:
             classifier.set_params(**{param: val})
 
         # Train and evaluate
-        pipeline = train_imdb_classifier(classifier, print_debug=print_debug)  # Update function as needed
+        pipeline = train_imdb_classifier(classifier, print_debug=print_debug)  
         accuracy = cross_validate_score(pipeline, train_data, k=5)
         accuracies.append(accuracy)
 
