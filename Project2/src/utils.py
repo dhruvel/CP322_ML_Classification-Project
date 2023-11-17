@@ -60,7 +60,9 @@ Trains the given classifier on the newsgroup data and returns the pipeline.
 
 Parameters:
     classifier: The classifier to train
+    params: Different hyperparameters values to try. If not given, no hyperparameters will be tested.
     print_debug: Whether to print debug information
+
 Returns:
     (Pipeline) The sklearn pipeline
 
@@ -95,8 +97,9 @@ Trains the given classifier on the IMDB data and returns the pipeline.
 
 Parameters:
     classifier: The classifier to train
+    params: Different hyperparameters values to try. If not given, no hyperparameters will be tested.
     print_debug: Whether to print debug information
-    params: Hyperparameters to use for grid search
+
 Returns:
     (Pipeline) The sklearn pipeline
 
