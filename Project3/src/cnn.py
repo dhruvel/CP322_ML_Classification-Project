@@ -2,9 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-import numpy as np
+import time
 
 from data import trainloader, testloader, classes
+
+EPOCHS = 5
 
 CL3_64 = 0
 CL64_128 = 1
@@ -76,9 +78,10 @@ cnn = SimpleNet()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(cnn.parameters(), lr=0.001, momentum=0.9)
 
-epochs = 2
-print("Training for {} epochs".format(epochs))
-for epoch in range(epochs):
+start_time = time.time()
+
+print("Training for {} epochs".format(EPOCHS))
+for epoch in range(EPOCHS):
     print("Epoch {}".format(epoch + 1))
 
     running_loss = 0.0
@@ -95,11 +98,13 @@ for epoch in range(epochs):
         # Current training loss
         running_loss += loss.item()
         if (i + 1) % 100 == 0:
-            print('[%d, %5d] loss: %.3f' %
-                  (epoch + 1, i + 1, running_loss / 100))
+            print('[%d, %4d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 100))
             running_loss = 0.0
 
-print('Finished Training')
+print('Finished Training in {} seconds'.format(time.time() - start_time))
+
+torch.save(cnn.state_dict(), "models/cnn.pt")
+cnn.eval()
 
 correct = 0
 total = 0
@@ -111,4 +116,4 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
-print('Accuracy of the network on the 10000 test images: %d'.format(100 * correct / total))
+print('Accuracy of the network on the test images: {}'.format(100 * correct / total))
