@@ -3,10 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import time
+from datetime import datetime
 
 from data import trainloader, testloader, classes
 
-EPOCHS = 5
+EPOCHS = 1
 
 CL3_64 = 0
 CL64_128 = 1
@@ -47,7 +48,7 @@ class SimpleNet(nn.Module):
             nn.BatchNorm2d(out_channels, eps=0.00001, momentum=0.05, affine=True)
             for out_channels in [64, 128, 256, 512, 2048]
         ]
-        self.pool = nn.MaxPool2d(2, 2, ceil_mode=False)
+        self.pool = nn.MaxPool2d(2, 2)
         self.dropout = nn.Dropout2d(0.1)
         self.fc = nn.Linear(256, 10)
     
@@ -56,20 +57,20 @@ class SimpleNet(nn.Module):
         x = F.relu(self.norms[BN128](self.convs[CL64_128](x)))          # 32x32x64 -> 32x32x128
         for _ in range(2):                                              # 32x32x128 -> 32x32x128 x2
             x = F.relu(self.norms[BN128](self.convs[CL128_128](x)))
-        x = self.dropout(self.pool(x))                                  # 32x32x128 -> 16x16x128
+        x = self.pool(x)                                  # 32x32x128 -> 16x16x128
         for _ in range(2):                                              # 16x16x128 -> 16x16x128 x2
             x = F.relu(self.norms[BN128](self.convs[CL128_128](x)))
         x = F.relu(self.norms[BN256](self.convs[CL128_256](x)))         # 16x16x128 -> 16x16x256
-        x = self.dropout(self.pool(x))                                  # 16x16x256 -> 8x8x256
+        x = self.pool(x)                                  # 16x16x256 -> 8x8x256
         for _ in range(2):                                              # 8x8x256 -> 8x8x256 x2
             x = F.relu(self.norms[BN256](self.convs[CL256_256](x)))
-        x = self.dropout(self.pool(x))                                  # 8x8x256 -> 4x4x256
+        x = self.pool(x)                                  # 8x8x256 -> 4x4x256
         x = F.relu(self.norms[BN512](self.convs[CL256_512](x)))         # 4x4x256 -> 4x4x512
-        x = F.relu(self.norms[BN2048](self.convs[CL512_2048](x)))       # 4x4x512 -> 4x4x2048
-        x = F.relu(self.norms[BN256](self.convs[CL2048_256](x)))        # 4x4x2048 -> 4x4x256
-        x = self.dropout(self.pool(x))                                  # 4x4x256 -> 2x2x256
+        x = self.pool(x)                                  # 4x4x512 -> 2x2x512
+        x = F.relu(self.norms[BN2048](self.convs[CL512_2048](x)))       # 2x2x512 -> 2x2x2048
+        x = F.relu(self.norms[BN256](self.convs[CL2048_256](x)))        # 2x2x2048 -> 2x2x256
         x = F.relu(self.norms[BN256](self.convs[CL256_256](x)))         # 2x2x256 -> 2x2x256
-        x = self.dropout(self.pool(x))                                  # 2x2x256 -> 1x1x256
+        x = self.pool(x)                                  # 2x2x256 -> 1x1x256
         x = x.view(-1, 256)                                             # 1x1x256 -> 256
         x = self.fc(x)                                                  # 256 -> 10
         return x
@@ -92,18 +93,22 @@ for epoch in range(EPOCHS):
         # Forward + Backpropagate + Gradient Descent
         outputs = cnn(inputs)
         loss = criterion(outputs, labels)
+        
         loss.backward()
         optimizer.step()
 
-        # Current training loss
+        # Current training loss and accuracy
         running_loss += loss.item()
         if (i + 1) % 100 == 0:
-            print('[%d, %4d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 100))
+            accuracy = (torch.max(outputs, 1)[1] == labels).sum().item() / labels.size(0)
+            print('[%d, %4d] loss: %.3f, accuracy: %.2f' % (epoch + 1, i + 1, running_loss / 100, accuracy * 100))
             running_loss = 0.0
 
 print('Finished Training in {} seconds'.format(time.time() - start_time))
 
-torch.save(cnn.state_dict(), "models/cnn.pt")
+torch.save(cnn.state_dict(), "../models/cnn_{}.pt".format(datetime.now().strftime("%d%m%Y_%H%M%S")))
+
+# Set model to evaluation mode
 cnn.eval()
 
 correct = 0
@@ -116,4 +121,4 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
-print('Accuracy of the network on the test images: {}'.format(100 * correct / total))
+print('Accuracy of the network on the test images: {}%'.format(100 * correct / total))

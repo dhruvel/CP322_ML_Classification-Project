@@ -2,19 +2,31 @@ import os
 import torch
 import torchvision
 import torchvision.transforms as transforms
+from torch.utils.data import ConcatDataset
 
 # Ensure we're running from src directory
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-# Normalize the data
+_transform = transforms.Compose([transforms.ToTensor()])
+_trainset = torchvision.datasets.CIFAR10(root='../data', train=True, download=True, transform=_transform)
+
+# Stack all train images together into a tensor
+x = torch.stack([sample[0] for sample in ConcatDataset([_trainset])])
+# Get the mean and std of each channel
+mean = torch.mean(x, dim=(0, 2, 3))
+std = torch.std(x, dim=(0, 2, 3))
+
+# Load data again, this time with normalizing
 _transform = transforms.Compose([
+    transforms.Resize(224),
     transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    transforms.Normalize(mean, std)
+    # Could add rotation and/or cropping here to add more samples to train on
 ])
 
 # PyTorch recommends a batch size of 4, but I feel that's too small
 # Increasing batch size reduces training time, but might also reduce accuracy
-batch_size = 32
+batch_size = 64
 
 # Load train data
 _trainset = torchvision.datasets.CIFAR10(root='../data', train=True, download=True, transform=_transform)
