@@ -18,7 +18,7 @@ std = torch.std(x, dim=(0, 2, 3))
 
 # Load data again, this time with normalizing
 _transform = transforms.Compose([
-    transforms.Resize(224),
+    # transforms.Resize(227),     # Comment out for ANN
     transforms.ToTensor(),
     transforms.Normalize(mean, std)
     # Could add rotation and/or cropping here to add more samples to train on
