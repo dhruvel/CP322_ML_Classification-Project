@@ -7,7 +7,7 @@ from datetime import datetime
 
 from data import trainloader, testloader, classes
 
-EPOCHS = 1
+EPOCHS = 10
 
 CL3_64 = 0
 CL64_128 = 1
@@ -57,20 +57,20 @@ class SimpleNet(nn.Module):
         x = F.relu(self.norms[BN128](self.convs[CL64_128](x)))          # 32x32x64 -> 32x32x128
         for _ in range(2):                                              # 32x32x128 -> 32x32x128 x2
             x = F.relu(self.norms[BN128](self.convs[CL128_128](x)))
-        x = self.pool(x)                                  # 32x32x128 -> 16x16x128
+        x = self.dropout(self.pool(x))                                  # 32x32x128 -> 16x16x128
         for _ in range(2):                                              # 16x16x128 -> 16x16x128 x2
             x = F.relu(self.norms[BN128](self.convs[CL128_128](x)))
         x = F.relu(self.norms[BN256](self.convs[CL128_256](x)))         # 16x16x128 -> 16x16x256
-        x = self.pool(x)                                  # 16x16x256 -> 8x8x256
+        x = self.dropout(self.pool(x))                                  # 16x16x256 -> 8x8x256
         for _ in range(2):                                              # 8x8x256 -> 8x8x256 x2
             x = F.relu(self.norms[BN256](self.convs[CL256_256](x)))
-        x = self.pool(x)                                  # 8x8x256 -> 4x4x256
+        x = self.dropout(self.pool(x))                                  # 8x8x256 -> 4x4x256
         x = F.relu(self.norms[BN512](self.convs[CL256_512](x)))         # 4x4x256 -> 4x4x512
-        x = self.pool(x)                                  # 4x4x512 -> 2x2x512
         x = F.relu(self.norms[BN2048](self.convs[CL512_2048](x)))       # 2x2x512 -> 2x2x2048
         x = F.relu(self.norms[BN256](self.convs[CL2048_256](x)))        # 2x2x2048 -> 2x2x256
+        x = self.dropout(self.pool(x))                                  # 4x4x256 -> 2x2x256
         x = F.relu(self.norms[BN256](self.convs[CL256_256](x)))         # 2x2x256 -> 2x2x256
-        x = self.pool(x)                                  # 2x2x256 -> 1x1x256
+        x = self.dropout(self.pool(x))                                  # 2x2x256 -> 1x1x256
         x = x.view(-1, 256)                                             # 1x1x256 -> 256
         x = self.fc(x)                                                  # 256 -> 10
         return x

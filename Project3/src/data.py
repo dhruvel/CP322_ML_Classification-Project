@@ -24,7 +24,6 @@ _transform = transforms.Compose([
     # Could add rotation and/or cropping here to add more samples to train on
 ])
 
-# PyTorch recommends a batch size of 4, but I feel that's too small
 # Increasing batch size reduces training time, but might also reduce accuracy
 batch_size = 64
 

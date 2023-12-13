@@ -7,33 +7,7 @@ from datetime import datetime
 
 from data import trainloader, testloader, classes
 
-EPOCHS = 1
-
-CL3_64 = 0
-CL64_128 = 1
-CL128_128 = 2
-CL128_256 = 3
-CL256_256 = 4
-CL256_512 = 5
-CL512_2048 = 6
-CL2048_256 = 7
-
-BN64 = 0
-BN128 = 1
-BN256 = 2
-BN512 = 3
-BN2048 = 4
-
-convLayers = [
-    (3, 64, 3),
-    (64, 128, 3),
-    (128, 128, 3),
-    (128, 256, 3),
-    (256, 256, 3),
-    (256, 512, 3),
-    (512, 2048, 1),
-    (2048, 256, 1),
-]
+EPOCHS = 20
 
 # Based on the AlexNet architecture
 class AlexNet(nn.Module):
