@@ -4,44 +4,43 @@ import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.nn.utils import prune
 
 from data import trainloader, testloader, classes
 
 EPOCHS = 250
-PATIENCE = 10  # Number of epochs with no improvement to wait before stopping
-LEARNING_RATES = [0.001]
-MOMENTA = [0.9]
-DROPOUT_PROBS = [0.1, 0.3, 0.5, 0.7]
+PATIENCE = 80
+HIDDEN_LAYERS = [
+    [512, 256, 128]
+]
 
 class DeepANN(nn.Module):
-    def __init__(self):
+    def __init__(self, input_size, hidden_sizes, output_size):
         super(DeepANN, self).__init__()
-        self.fc1 = nn.Linear(32 * 32 * 3, 512)  # Increase units in the first hidden layer
-        self.relu1 = nn.ReLU()
-        self.fc2 = nn.Linear(512, 256)  # Add a second hidden layer with 256 units
-        self.relu2 = nn.ReLU()
-        self.fc3 = nn.Linear(256, 128)  # Add a third hidden layer with 128 units
-        self.relu3 = nn.ReLU()
-        self.fc4 = nn.Linear(128, 64)  # Add a fourth hidden layer with 64 units
-        self.relu4 = nn.ReLU()
-        self.fc5 = nn.Linear(64, 32)  # Add a fifth hidden layer with 32 units
-        self.relu5 = nn.ReLU()
-        self.fc6 = nn.Linear(32, 16)  # Add a sixth hidden layer with 16 units
-        self.relu6 = nn.ReLU()
-        self.fc7 = nn.Linear(16, 8)  # Add a seventh hidden layer with 8 units
-        self.relu7 = nn.ReLU()
-        self.fc8 = nn.Linear(8, 10)  # Output layer with 10 units
+        self.input_size = input_size
+        self.hidden_sizes = hidden_sizes
+        self.output_size = output_size
+
+        layers = []
+        sizes = [input_size] + hidden_sizes + [output_size]
+        for i in range(1, len(sizes)):
+            linear_layer = nn.Linear(sizes[i - 1], sizes[i])
+            layers.append(linear_layer)
+            layers.append(nn.BatchNorm1d(sizes[i]))
+            if i < len(sizes) - 1:
+                layers.append(nn.ReLU())
+
+            # Add pruning to the linear layer
+            prune.l1_unstructured(linear_layer, name='weight', amount=0.2)
+
+        # Create the model
+        self.model = nn.Sequential(*layers)
 
     def forward(self, x):
-        x = x.view(-1, 32 * 32 * 3)  # Flatten the input
-        x = self.relu1(self.fc1(x))
-        x = self.relu2(self.fc2(x))
-        x = self.relu3(self.fc3(x))
-        x = self.relu4(self.fc4(x))
-        x = self.relu5(self.fc5(x))
-        x = self.relu6(self.fc6(x))
-        x = self.relu7(self.fc7(x))
-        x = self.fc8(x)
+        # Flatten the input if needed
+        input_size = x.view(x.size(0), -1).size(1)
+        x = x.view(-1, input_size)
+        x = self.model(x)
         return x
 
 class SimpleANN(nn.Module):
@@ -63,64 +62,25 @@ class SimpleANN(nn.Module):
         x = self.fc4(x)
         return x
 
-class ModifiedSimpleANN(nn.Module):
-    def __init__(self, dropout_prob=0.5):
-        super(ModifiedSimpleANN, self).__init__()
-        self.fc1 = nn.Linear(32 * 32 * 3, 512)
-        self.elu1 = nn.ELU()
-        self.dropout1 = nn.Dropout(p=dropout_prob)
-        self.fc2 = nn.Linear(512, 256)
-        self.elu2 = nn.ELU()
-        self.dropout2 = nn.Dropout(p=dropout_prob)
-        self.fc3 = nn.Linear(256, 128)
-        self.elu3 = nn.ELU()
-        self.dropout3 = nn.Dropout(p=dropout_prob)
-        self.fc4 = nn.Linear(128, 64)
-        self.elu4 = nn.ELU()
-        self.dropout4 = nn.Dropout(p=dropout_prob)
-        self.fc5 = nn.Linear(64, 10)
-
-    def forward(self, x):
-        x = x.view(-1, 32 * 32 * 3)
-        x = self.dropout1(self.elu1(self.fc1(x)))
-        x = self.dropout2(self.elu2(self.fc2(x)))
-        x = self.dropout3(self.elu3(self.fc3(x)))
-        x = self.dropout4(self.elu4(self.fc4(x)))
-        x = self.fc5(x)
-        return x
-
 def main():
     best = 0
-    best_dropout, best_lr, best_momentum = [], [], []
-    for lr in LEARNING_RATES:
-        for momentum in MOMENTA:
-            for dropout_prob in DROPOUT_PROBS:
-                print("Running model with lr={}, momentum={}, dropout_prob={}".format(lr, momentum, dropout_prob))
-                accuracy = run_model(lr, momentum, dropout_prob)
-                if accuracy > best:
-                    best = accuracy
-                    best_dropout.append(dropout_prob)
-                    best_lr.append(lr)
-                    best_momentum.append(momentum)
+    func = None
+    for hidden_layer in HIDDEN_LAYERS:
+        accuracy = run_model(hidden_layer)
+        best = accuracy if accuracy > best else best
+        func = hidden_layer if func == None or accuracy > best else func
 
-    # Print the most recent 'best' values
-    print("Most Recent Best Values:")
-    print(f"Best Dropout: {best_dropout[-1]}")
-    print(f"Best Learning Rate: {best_lr[-1]}")
-    print(f"Best Momentum: {best_momentum[-1]}")
-    print("")
-
-    # Print the most common 'best' values
-    print("Most Common Best Values:")
-    print(f"Most Common Dropout: {Counter(best_dropout).most_common(1)[0][0]}")
-    print(f"Most Common Learning Rate: {Counter(best_lr).most_common(1)[0][0]}")
-    print(f"Most Common Momentum: {Counter(best_momentum).most_common(1)[0][0]}")
+    print('best is: ', best)
+    print("layer is", func)
     return
 
-def run_model(lr, momentum, dropout_prob):
-    ann = ModifiedSimpleANN(dropout_prob)
+def run_model(hidden_sizes):
+    print("hidden layer is:", hidden_sizes)
+    input_size = 32 * 32 * 3
+    output_size = 10
+    ann = DeepANN(input_size, hidden_sizes, output_size)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(ann.parameters(), lr=lr, momentum=momentum)
+    optimizer = optim.SGD(ann.parameters(), lr=0.001, momentum=0.9, weight_decay = 1e-5)
 
     start_time = time.time()
 
@@ -129,7 +89,6 @@ def run_model(lr, momentum, dropout_prob):
     best_validation_loss = float('inf')
     no_improvement_count = 0
 
-    print("Training for {} epochs".format(EPOCHS))
     for epoch in range(EPOCHS):
         print("Epoch {}".format(epoch + 1))
 
